@@ -7,12 +7,17 @@ package vista;
 import java.awt.Color;
 import java.awt.event.*;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import javax.swing.text.AttributeSet;
+import javax.swing.text.Position;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
@@ -262,34 +267,68 @@ public class Principal extends javax.swing.JFrame implements ActionListener {
             AttributeSet ciclo = sc.addAttribute(SimpleAttributeSet.EMPTY, StyleConstants.Background, Color.PINK);
             AttributeSet mensaje = sc.addAttribute(SimpleAttributeSet.EMPTY, StyleConstants.Background, Color.ORANGE);
             AttributeSet fin = sc.addAttribute(SimpleAttributeSet.EMPTY, StyleConstants.Background, Color.CYAN);
-
-            if (array[0].trim().toUpperCase().contains("INICIO")) {
-
-            } else {
-
-            }
+            Map<String, AttributeSet> map = new HashMap<String, AttributeSet>();
+            map.put("INICIO", inicio);
+            map.put("ENSAJE", ciclo);
+            map.put("UNDO", mensaje);
+            map.put("FIN", fin);
+            List<String> list = Arrays.asList("INICIO", "ENSAJE", "UNDO", "FIN");
+            boolean start = false, end = false, error = false;
             if (array.length > 0) {
-
                 for (int x = 0; x < array.length; x++) {
+                    String temp = list.stream()
+                            .filter(array[x].trim().toUpperCase()::contains)
+                            .findFirst()
+                            .map(v -> v)
+                            .orElse(null);
+                    int startindex = 0, endindex = 0;
+                    if (temp != null) {
+                        switch (temp) {
+                            case "INICIO":
+                                if (start || end) {
+                                    error = true;
+                                    break;
+                                }
+                                start = true;
+                                startindex = array[x].trim().toUpperCase().indexOf(temp);
+                                endindex = startindex + 6;
+                                break;
+                            case "ENSAJE":
+                                for (int y = 0; y < x; y++) {
+                                    startindex = startindex + array[y].length() + 1;
+                                }
+                                startindex = array[x].trim().toUpperCase().indexOf(temp) + startindex;
+                                //inicio#
+                                //mensaje#
+                                endindex = 6;
+                                break;
+                            case "UNDO":
+                                for (int y = 0; y < x; y++) {
+                                    startindex = startindex + array[y].length() + 1;
+                                }
+                                startindex = array[x].trim().toUpperCase().indexOf(temp) + startindex;
+                                endindex = 5;
+                                break;
+                            case "FIN":
+                                if (end) {
+                                    error = true;
+                                    break;
+                                }
+                                end = true;
+                                for (int y = 0; y < x; y++) {
+                                    startindex = startindex + array[y].length() + 1;
+                                }
+                                startindex = array[x].trim().toUpperCase().indexOf(temp) + startindex - 1;
+                                endindex = 3;
 
-                    int startIndex = 0;
-                    int endIndex = 0;
-                    if (x > 0) {
-                        int z = 0;
-                        for (z = 0; z <= x; z++) {
-                            startIndex = 1 + array[z].length();
+                                break;
                         }
-                        endIndex = startIndex + array[x].length();
-                    } else {
-                        endIndex = array[x].length();//startIndex + currentSym.value.toString().length();
                     }
-                    //escogemos un colo para pintarlo
-                    // DefaultHighlighter.DefaultHighlightPainter painter = new DefaultHighlighter.DefaultHighlightPainter(Color.LIGHT_GRAY);
+                    if (!error) {
+                        doc.setCharacterAttributes(startindex, endindex, map.get(temp), true);
+                    }
 
-                    //Por ultimo agregamos esas 3 variables anterior a un nuevo estilo Highlight a nuestro TEXTAREA
                 }
-                doc.setCharacterAttributes(0, 3, attrs, true);
-                doc.setCharacterAttributes(4, 6, attrs, true);
             }
         } catch (Exception ex) {
             Logger.getLogger(Principal.class.getName()).log(Level.SEVERE, null, ex);
