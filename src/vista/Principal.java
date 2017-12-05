@@ -371,14 +371,26 @@ public class Principal extends javax.swing.JFrame implements ActionListener {
                                 endindex = startindex + 6;
                                 break;
                             case "ENSAJE":
+                                if (end || !start) {
+                                    error = true;
+                                    mensaje = "Error en etiqueta inicio o fin";
+                                    break;
+                                }
                                 for (int y = 0; y < x; y++) {
                                     startindex = startindex + array[y].length() + 1;
                                 }
                                 startindex = array[x].trim().toUpperCase().indexOf(temp) + startindex;
                                 int inicio = array[x].trim().indexOf("\"");
-                                
-                                int fin = array[x].trim().substring(inicio+1).indexOf("\"");
-                                String mensajes = array[x].trim().substring(inicio + 1, fin+inicio + 1);
+
+                                int fin = array[x].trim().substring(inicio + 1).indexOf("\"");
+                                String mensajes;
+                                try {
+                                    mensajes = array[x].trim().substring(inicio + 1, fin + inicio + 1);
+                                } catch (Exception e) {
+                                    error = true;
+                                    mensaje = "La etiqueta mensaje se ha escrito de manera incorrecta";
+                                    break;
+                                }
                                 String temp2 = list.stream()
                                         .filter(array[x - 1].trim().toUpperCase()::contains)
                                         .findFirst()
@@ -393,28 +405,27 @@ public class Principal extends javax.swing.JFrame implements ActionListener {
                                 }
                                 break;
                             case "UNDO":
-
+                                if (end || !start) {
+                                    error = true;
+                                    mensaje = "Error en etiqueta inicio o fin";
+                                    break;
+                                }
                                 int inicio1 = array[x].trim().indexOf("[");
                                 int fin1 = array[x].trim().indexOf("]");
-                                String result = array[x].trim().substring(inicio1 + 1, fin1);
-                                if (result != null) {
-                                    try {
-                                        repite = Integer.parseInt(result);
 
-                                    } catch (NumberFormatException e) {
-                                        error = true;
-                                        mensaje = "no es un numero valido dentro de corchetes";
-                                        break;
-                                    }
-                                } else {
+                                try {
+                                    String result = array[x].trim().substring(inicio1 + 1, fin1);
+                                    repite = Integer.parseInt(result);
+
+                                } catch (Exception e) {
                                     error = true;
-                                    mensaje = "La etiqueta undo se encuentra mal escrita";
+                                    mensaje = "la etiqueta undo se encuentra mal escrita";
                                     break;
                                 }
 
                                 break;
                             case "FIN":
-                                if (end) {
+                                if (end || !start) {
                                     error = true;
                                     mensaje = "Error en etiqueta inicio o fin";
                                     break;
