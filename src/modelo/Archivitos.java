@@ -9,10 +9,8 @@ import java.io.IOException;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
-
 public class Archivitos {
 
-    
     public static String getPoneNombre() {
         return poneNombre;
     }
@@ -22,6 +20,7 @@ public class Archivitos {
     }
     private String nombreArchivo;
     private static String poneNombre;
+
     // crea archivo
     public void crearArchivo(String datos) throws IOException {
         try {
@@ -31,20 +30,24 @@ public class Archivitos {
             fc.showSaveDialog(new Principal());
             fc.getFileFilter();
             String path = fc.getSelectedFile().getPath();
-            File guardar = new File(path + ".txt");
-            setNombreArchivo(path+".txt");
-            if (guardar != null) {
-                FileWriter guardaTexto = new FileWriter(guardar);
-                guardaTexto.write(datos);
-                guardaTexto.close();
+            if (!path.equals("")) {
+                File guardar = new File(path + ".txt");
+                setNombreArchivo(path + ".txt");
+                if (guardar != null) {
+                    FileWriter guardaTexto = new FileWriter(guardar);
+                    guardaTexto.write(datos);
+                    guardaTexto.close();
+                }
             }
+
         } catch (IOException ioe) {
             System.out.println(ioe);
         }
     }
 //actualiza el contenido en un archivo
-     public void crearArchivoUno(String datos,String nombre) throws IOException {
-        try {            
+
+    public void crearArchivoUno(String datos, String nombre) throws IOException {
+        try {
             File guardar = new File(nombre);
             setNombreArchivo(nombre);
             if (guardar != null) {
@@ -56,7 +59,8 @@ public class Archivitos {
             System.out.println(ioe);
         }
     }
-     //metodo para abrir archivos
+    //metodo para abrir archivos
+
     public String abrirArchivo() throws IOException {
         String s = "", cad = "";
         try {
@@ -75,7 +79,9 @@ public class Archivitos {
                     }
                     leer.close();
                 }
-            }else {JOptionPane.showMessageDialog(null, "Solo se permiten archivos con extension *.txt");}
+            } else {
+                JOptionPane.showMessageDialog(null, "Solo se permiten archivos con extension *.txt");
+            }
         } catch (IOException e) {
             JOptionPane.showMessageDialog(null, "Error " + e);
         }

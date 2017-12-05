@@ -16,7 +16,10 @@ import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
+import javax.swing.JTextPane;
 import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.Position;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.Style;
@@ -28,14 +31,87 @@ import modelo.Archivitos;
 public class Principal extends javax.swing.JFrame implements ActionListener {
 
     public Principal() {
-        initComponents();
-        setTitle("Sin Titulo_" + numHoja);
+
+        final StyleContext cont = StyleContext.getDefaultStyleContext();
+        final AttributeSet attrGreen = cont.addAttribute(cont.getEmptySet(), StyleConstants.Foreground, Color.GREEN);
+        final AttributeSet attrBlue = cont.addAttribute(cont.getEmptySet(), StyleConstants.Foreground, Color.BLUE);
+        final AttributeSet attrRed = cont.addAttribute(cont.getEmptySet(), StyleConstants.Foreground, Color.RED);
+        final AttributeSet attrGray = cont.addAttribute(cont.getEmptySet(), StyleConstants.Foreground, Color.gray);
+        final AttributeSet attrBlack = cont.addAttribute(cont.getEmptySet(), StyleConstants.Foreground, Color.BLACK);
+        DefaultStyledDocument doc = new DefaultStyledDocument() {
+            @Override
+            public void insertString(int offset, String str, AttributeSet a) throws BadLocationException {
+                super.insertString(offset, str, a);
+
+                String text = getText(0, getLength());
+                int before = findLastNonWordChar(text, offset);
+                if (before < 0) {
+                    before = 0;
+                }
+                int after = findFirstNonWordChar(text, offset + str.length());
+                int wordL = before;
+                int wordR = before;
+
+                while (wordR <= after) {
+                    if (wordR == after || String.valueOf(text.charAt(wordR)).matches("\\W")) {
+
+                        if (text.substring(wordL, wordR).toUpperCase().matches("(\\W)*(INICIO)")) {
+                            setCharacterAttributes(wordL, wordR - wordL, attrGreen, false);
+                        } else if (text.substring(wordL, wordR).toUpperCase().matches("(\\W)*(ENSAJE)")) {
+                            setCharacterAttributes(wordL, wordR - wordL, attrBlue, false);
+                        } else if (text.substring(wordL, wordR).toUpperCase().matches("(\\W)*(UNDO)")) {
+                            setCharacterAttributes(wordL, wordR - wordL, attrGray, false);
+                        } else if (text.substring(wordL, wordR).toUpperCase().matches("(\\W)*(FIN)")) {
+                            setCharacterAttributes(wordL, wordR - wordL, attrRed, false);
+                        } else if (text.substring(wordL, wordR).toUpperCase().matches("#")) {
+                            setCharacterAttributes(wordL, wordR - wordL, attrRed, false);
+                        } else {
+                            setCharacterAttributes(wordL, wordR - wordL, attrBlack, false);
+                        }
+
+                        wordL = wordR;
+                    }
+                    wordR++;
+                }
+            }
+
+            @Override
+            public void remove(int offs, int len) throws BadLocationException {
+                super.remove(offs, len);
+
+                String text = getText(0, getLength());
+                int before = findLastNonWordChar(text, offs);
+                if (before < 0) {
+                    before = 0;
+                }
+                int after = findFirstNonWordChar(text, offs);
+
+                if (text.substring(before, after).matches("(\\W)*(System)")) {
+                    setCharacterAttributes(before, after - before, attrBlue, false);
+                } else if (text.substring(before, after).matches("(\\W)*(PlasmaMembrane)")) {
+                    setCharacterAttributes(before, after - before, attrBlue, false);
+                } else if (text.substring(before, after).matches("(\\W)*(Cytosol)")) {
+                    setCharacterAttributes(before, after - before, attrBlue, false);
+                } else if (text.substring(before, after).matches("(\\W)*(Organelle)")) {
+                    setCharacterAttributes(before, after - before, attrBlue, false);
+                } else if (text.substring(before, after).matches("(\\W)*(Nucleous)")) {
+                    setCharacterAttributes(before, after - before, attrBlue, false);
+                } else if (text.substring(before, after).matches("(\\W)*(volume)")) {
+                    setCharacterAttributes(before, after - before, attrRed, false);
+                } else if (text.substring(before, after).matches("(\\W)*(rate)")) {
+                    setCharacterAttributes(before, after - before, attrRed, false);
+                } else {
+                    setCharacterAttributes(before, after - before, attrBlack, false);
+                }
+            }
+        };
+
+        initComponents(doc);
+        /*  setTitle("Sin Titulo_" + numHoja);
         txtNumLineas.append(numLin + "\n");
         areaTexto.setComponentPopupMenu(jPopupMenu1);
-        poneAcciones();
-
-    }
-//Este método sirve para agregar las acciones a cada componente
+        poneAcciones();*/
+    } //Este método sirve para agregar las acciones a cada componente
 
     private void poneAcciones() {
         areaTexto.addKeyListener(new KeyAdapter() {
@@ -65,9 +141,28 @@ public class Principal extends javax.swing.JFrame implements ActionListener {
 
     }
 
+    private int findLastNonWordChar(String text, int index) {
+        while (--index >= 0) {
+            if (String.valueOf(text.charAt(index)).matches("\\W")) {
+                break;
+            }
+        }
+        return index;
+    }
+
+    private int findFirstNonWordChar(String text, int index) {
+        while (index < text.length()) {
+            if (String.valueOf(text.charAt(index)).matches("\\W")) {
+                break;
+            }
+            index++;
+        }
+        return index;
+    }
+
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents() {
+    private void initComponents(DefaultStyledDocument doc) {
 
         jPopupMenu1 = new javax.swing.JPopupMenu();
         jpmiCopiar = new javax.swing.JMenuItem();
@@ -80,7 +175,7 @@ public class Principal extends javax.swing.JFrame implements ActionListener {
         jScrollPane2 = new javax.swing.JScrollPane();
         txtNumLineas = new javax.swing.JTextArea();
         jScrollPane3 = new javax.swing.JScrollPane();
-        areaTexto = new javax.swing.JTextPane();
+        areaTexto = new javax.swing.JTextPane(doc);
         jScrollPane1 = new javax.swing.JScrollPane();
         salida = new javax.swing.JTextArea();
         jMenuBar1 = new javax.swing.JMenuBar();
@@ -251,29 +346,10 @@ public class Principal extends javax.swing.JFrame implements ActionListener {
     private void update() {
         try {
             String[] array = areaTexto.getText().split("#");
-            // Start with the current input attributes for the JTextPane. This
-            // should ensure that we do not wipe out any existing attributes
-            // (such as alignment or other paragraph attributes) currently
-            // set on the text area.
-            Style defaultStyle = StyleContext.
-                    getDefaultStyleContext().
-                    getStyle(StyleContext.DEFAULT_STYLE);
-            StyledDocument doc = areaTexto.getStyledDocument();
-            doc.setCharacterAttributes(0, doc.getLength(), defaultStyle, true);
-
-            StyleContext sc = StyleContext.getDefaultStyleContext();
-
-            AttributeSet inicio = sc.addAttribute(SimpleAttributeSet.EMPTY, StyleConstants.Background, Color.YELLOW);
-            AttributeSet ciclo = sc.addAttribute(SimpleAttributeSet.EMPTY, StyleConstants.Background, Color.PINK);
-            AttributeSet mensaje = sc.addAttribute(SimpleAttributeSet.EMPTY, StyleConstants.Background, Color.ORANGE);
-            AttributeSet fin = sc.addAttribute(SimpleAttributeSet.EMPTY, StyleConstants.Background, Color.CYAN);
-            Map<String, AttributeSet> map = new HashMap<String, AttributeSet>();
-            map.put("INICIO", inicio);
-            map.put("ENSAJE", ciclo);
-            map.put("UNDO", mensaje);
-            map.put("FIN", fin);
+            String mensaje = "Output: ";
             List<String> list = Arrays.asList("INICIO", "ENSAJE", "UNDO", "FIN");
             boolean start = false, end = false, error = false;
+            int repite = 0;
             if (array.length > 0) {
                 for (int x = 0; x < array.length; x++) {
                     String temp = list.stream()
@@ -287,6 +363,7 @@ public class Principal extends javax.swing.JFrame implements ActionListener {
                             case "INICIO":
                                 if (start || end) {
                                     error = true;
+                                    mensaje = "Error en etiqueta inicio o fin";
                                     break;
                                 }
                                 start = true;
@@ -298,35 +375,56 @@ public class Principal extends javax.swing.JFrame implements ActionListener {
                                     startindex = startindex + array[y].length() + 1;
                                 }
                                 startindex = array[x].trim().toUpperCase().indexOf(temp) + startindex;
-                                //inicio#
-                                //mensaje#
-                                endindex = 6;
+                                int inicio = array[x].trim().indexOf("\"");
+                                
+                                int fin = array[x].trim().substring(inicio+1).indexOf("\"");
+                                String mensajes = array[x].trim().substring(inicio + 1, fin+inicio + 1);
+                                String temp2 = list.stream()
+                                        .filter(array[x - 1].trim().toUpperCase()::contains)
+                                        .findFirst()
+                                        .map(v -> v)
+                                        .orElse(null);
+                                if (temp2 == "UNDO") {
+                                    for (int z = 0; z < repite; z++) {
+                                        mensaje = mensaje + "\n" + mensajes;
+                                    }
+                                } else {
+                                    mensaje = mensaje + "\n" + mensajes;
+                                }
                                 break;
                             case "UNDO":
-                                for (int y = 0; y < x; y++) {
-                                    startindex = startindex + array[y].length() + 1;
+
+                                int inicio1 = array[x].trim().indexOf("[");
+                                int fin1 = array[x].trim().indexOf("]");
+                                String result = array[x].trim().substring(inicio1 + 1, fin1);
+                                if (result != null) {
+                                    try {
+                                        repite = Integer.parseInt(result);
+
+                                    } catch (NumberFormatException e) {
+                                        error = true;
+                                        mensaje = "no es un numero valido dentro de corchetes";
+                                        break;
+                                    }
+                                } else {
+                                    error = true;
+                                    mensaje = "La etiqueta undo se encuentra mal escrita";
+                                    break;
                                 }
-                                startindex = array[x].trim().toUpperCase().indexOf(temp) + startindex;
-                                endindex = 5;
+
                                 break;
                             case "FIN":
                                 if (end) {
                                     error = true;
+                                    mensaje = "Error en etiqueta inicio o fin";
                                     break;
                                 }
                                 end = true;
-                                for (int y = 0; y < x; y++) {
-                                    startindex = startindex + array[y].length() + 1;
-                                }
-                                startindex = array[x].trim().toUpperCase().indexOf(temp) + startindex - 1;
-                                endindex = 3;
-
                                 break;
                         }
                     }
-                    if (!error) {
-                        doc.setCharacterAttributes(startindex, endindex, map.get(temp), true);
-                    }
+
+                    salida.setText(mensaje);
 
                 }
             }
@@ -438,7 +536,11 @@ public class Principal extends javax.swing.JFrame implements ActionListener {
                     int p = JOptionPane.showConfirmDialog(null, "¿Desea guardar los cambios?", "Guardar", JOptionPane.YES_NO_OPTION);
                     if (p == JOptionPane.YES_OPTION) {
                         if (l.equalsIgnoreCase("Sin Titulo_")) {
-                            guarda();
+                            try {
+                                guarda();
+                            } catch (BadLocationException ex) {
+                                Logger.getLogger(Principal.class.getName()).log(Level.SEVERE, null, ex);
+                            }
                         } else {
                             guardaDos();
                         }
@@ -461,13 +563,21 @@ public class Principal extends javax.swing.JFrame implements ActionListener {
             String titulo = this.getTitle();
             String l = titulo.substring(0, titulo.length() - 1);
             if (l.equalsIgnoreCase("Sin Titulo_")) {
-                guarda();
+                try {
+                    guarda();
+                } catch (BadLocationException ex) {
+                    Logger.getLogger(Principal.class.getName()).log(Level.SEVERE, null, ex);
+                }
             } else {
                 guardaDos();
             }
             guardado++;
         } else if (e.getSource() == jmiGuardarComo) {
-            guarda();
+            try {
+                guarda();
+            } catch (BadLocationException ex) {
+                Logger.getLogger(Principal.class.getName()).log(Level.SEVERE, null, ex);
+            }
             guardado++;
         } else if (e.getSource() == jmiSalir) {
             System.exit(0);
@@ -485,7 +595,7 @@ public class Principal extends javax.swing.JFrame implements ActionListener {
     }
 //metodo que permite guardar mostrando el cuadro de guardado
 
-    private void guarda() {
+    private void guarda() throws BadLocationException {
         String s = areaTexto.getText();
         try {
             a = new Archivitos();
@@ -509,11 +619,6 @@ public class Principal extends javax.swing.JFrame implements ActionListener {
 //Este método sirve principalmente para ir añadiendo numeros de linea, 
 
     public void presionaTecla(KeyEvent evt) {
-        Style defaultStyle = StyleContext.
-                getDefaultStyleContext().
-                getStyle(StyleContext.DEFAULT_STYLE);
-        StyledDocument doc = areaTexto.getStyledDocument();
-        doc.setCharacterAttributes(0, doc.getLength(), defaultStyle, true);
 
         if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             numLin++;
@@ -532,6 +637,12 @@ public class Principal extends javax.swing.JFrame implements ActionListener {
                 numLin = 1;
             }
         }
+        Style defaultStyle = StyleContext.
+                getDefaultStyleContext().
+                getStyle(StyleContext.DEFAULT_STYLE);
+        StyledDocument doc = areaTexto.getStyledDocument();
+        doc.setCharacterAttributes(0, doc.getLength(), defaultStyle, true);
+
     }
 
 //En este método, cada fila del editor se va guardando en un vector
